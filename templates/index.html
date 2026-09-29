@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4eee6">
+  <title>CLOSET & CO. — Fashion Guidance</title>
+  <style>
+    :root {
+      --bg: #f4eee6; --paper: #fffaf4; --ink: #28241f; --muted: #84796d;
+      --accent: #a84d36; --accent-soft: #f2dfd5; --line: #e5d9cc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 24px; display: grid; place-items: center;
+      background: radial-gradient(ellipse at 8% 0%, #e6d3c1 0, transparent 42%), var(--bg);
+      color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .app { width: min(1000px, 100%); height: min(790px, calc(100vh - 48px)); min-height: 580px;
+      display: grid; grid-template-columns: 280px 1fr; overflow: hidden; border-radius: 26px;
+      border: 1px solid #dfd1c2; background: var(--paper); box-shadow: 0 28px 90px #49321d1c; }
+    aside { padding: 28px 22px; background: #eee3d6; border-right: 1px solid var(--line); }
+    .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 45px; }
+    .monogram { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 50%;
+      background: var(--accent); color: #fffaf4; font-family: Georgia, serif; font-size: 23px; font-weight: bold; }
+    .brand strong { display: block; font-family: Georgia, serif; font-size: 18px; letter-spacing: .2px; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; }
+    .eyebrow { color: var(--muted); font-size: 10px; letter-spacing: 1.8px; font-weight: 800; text-transform: uppercase; }
+    .side-title { margin: 13px 0; font-family: Georgia, serif; font-size: 29px; line-height: 1.15; letter-spacing: -.8px; }
+    .side-title em { color: var(--accent); font-weight: normal; }
+    .intro { color: #766b60; font-size: 13px; line-height: 1.7; }
+    .section-label { margin: 28px 0 11px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
+    .prompts { display: grid; gap: 9px; }
+    .prompt { display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid #dfd1c2;
+      border-radius: 12px; background: #f7f0e8; color: #4a4037; text-align: left; cursor: pointer; font: inherit; font-size: 12px; transition: .2s; }
+    .prompt:hover { border-color: var(--accent); transform: translateX(2px); }
+    .prompt span { color: var(--accent); font-size: 16px; }
+    main { display: flex; flex-direction: column; min-width: 0; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 23px 27px; border-bottom: 1px solid var(--line); }
+    header h1 { margin: 0; font-family: Georgia, serif; font-size: 17px; font-weight: 600; }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #6c8c60; }
+    #messages { flex: 1; overflow-y: auto; padding: 28px; display: flex; flex-direction: column; gap: 17px; }
+    .welcome { margin: auto 0; max-width: 480px; }
+    .welcome .badge { display: inline-block; padding: 7px 11px; border-radius: 20px; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: .7px; }
+    .welcome h2 { margin: 18px 0 12px; font-family: Georgia, serif; font-size: clamp(31px, 4vw, 45px); line-height: 1.08; letter-spacing: -1.3px; font-weight: 500; }
+    .welcome h2 em { color: var(--accent); font-weight: normal; }
+    .welcome p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.75; }
+    .message { max-width: 87%; padding: 14px 17px; border-radius: 17px; font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .message.user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 5px; }
+    .message.bot { align-self: flex-start; background: #f0e8df; border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+    .message.error { color: #a83232; }
+    #typing { padding: 0 28px 12px; color: var(--muted); font-size: 12px; }
+    form { padding: 14px 22px 20px; border-top: 1px solid var(--line); }
+    .composer { display: flex; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); background: #fffdf9; border-radius: 16px; }
+    input { flex: 1; min-width: 0; padding: 11px 12px; border: 0; outline: 0; color: var(--ink); background: transparent; font: inherit; font-size: 14px; }
+    input::placeholder { color: #a69a8d; }
+    #send { width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--accent); color: white; font-size: 20px; cursor: pointer; }
+    #send:disabled { opacity: .5; cursor: wait; }
+    .footnote { margin: 10px 4px 0; color: #a09588; font-size: 10px; text-align: center; }
+    @media (max-width: 700px) {
+      body { padding: 0; }
+      .app { width: 100%; height: 100dvh; min-height: 500px; border-radius: 0; grid-template-columns: 1fr; }
+      aside { display: none; }
+      header { padding: 18px 20px; }
+      #messages { padding: 20px; }
+      form { padding: 12px 14px 16px; }
+      .message { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><div class="monogram">C</div><div><strong>CLOSET & CO.</strong><small>your personal style studio</small></div></div>
+      <div class="eyebrow">Style starts with you</div>
+      <div class="side-title">Wear what<br>feels <em>like you.</em></div>
+      <p class="intro">Find outfit inspiration, explore color combinations, and build a wardrobe that fits your taste and everyday life.</p>
+      <div class="section-label">A little style inspiration</div>
+      <div class="prompts">
+        <button class="prompt" data-prompt="Suggest a versatile outfit for a casual day out."><span>✳</span> Casual day outfit</button>
+        <button class="prompt" data-prompt="Help me choose colors that work well together for an outfit."><span>◉</span> Color combinations</button>
+        <button class="prompt" data-prompt="Help me plan an outfit for a formal event."><span>◇</span> Formal occasion</button>
+        <button class="prompt" data-prompt="How can I build a versatile capsule wardrobe?"><span>▤</span> Capsule wardrobe</button>
+      </div>
+    </aside>
+    <main>
+      <header><h1>Fashion Guidance</h1><div class="status"><span class="dot"></span> Your style companion</div></header>
+      <section id="messages" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <span class="badge">✦ PERSONAL STYLE, YOUR WAY</span>
+          <h2>What are we<br>wearing <em>today?</em></h2>
+          <p>Tell me about your style, the occasion, or what’s in your wardrobe. I’ll help you put together a look that feels right for you.</p>
+        </div>
+      </section>
+      <div id="typing" hidden>Stylist is putting together ideas…</div>
+      <form id="chat-form">
+        <div class="composer">
+          <input id="message-input" maxlength="4000" autocomplete="off" placeholder="Ask me anything about fashion…" aria-label="Your fashion question">
+          <button id="send" type="submit" aria-label="Send message">↗</button>
+        </div>
+        <p class="footnote">Fashion guidance for your preferences, comfort, and personal expression.</p>
+      </form>
+    </main>
+  </div>
+  <script>
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message-input");
+    const messages = document.getElementById("messages");
+    const send = document.getElementById("send");
+    const typing = document.getElementById("typing");
+
+    function addMessage(text, role, isError = false) {
+      const welcome = document.getElementById("welcome");
+      if (welcome) welcome.remove();
+      const bubble = document.createElement("div");
+      bubble.className = `message ${role}${isError ? " error" : ""}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage(value) {
+      const message = value.trim();
+      if (!message || send.disabled) return;
+      addMessage(message, "user");
+      input.value = "";
+      send.disabled = true;
+      typing.hidden = false;
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to get a response.");
+        addMessage(data.reply, "bot");
+      } catch (error) {
+        addMessage(error.message || "Connection failed. Please try again.", "bot", true);
+      } finally {
+        typing.hidden = true;
+        send.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+    document.querySelectorAll(".prompt").forEach(button => {
+      button.addEventListener("click", () => sendMessage(button.dataset.prompt));
+    });
+  </script>
+</body>
+</html>
